@@ -1,8 +1,5 @@
-provider "aws" {
-  region = "us-east-1"
-}
 
-#vpc
+# VPC
 resource "aws_vpc" "main_vpc" {
   cidr_block = "10.0.0.0/16"
   tags = {
@@ -10,19 +7,16 @@ resource "aws_vpc" "main_vpc" {
   }
 }
 
-
-
 resource "aws_subnet" "main_subnet" {
-  vpc_id     = aws_vpc.main_vpc.id
-  cidr_block = "10.0.1.0/24"
+  vpc_id            = aws_vpc.main_vpc.id
+  cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1a"
-
   tags = {
     Name = "main-subnet"
   }
 }
 
-#Internet Gateway
+# Internet Gateway
 resource "aws_internet_gateway" "my_igw" {
   vpc_id = aws_vpc.main_vpc.id
 }
@@ -33,14 +27,14 @@ resource "aws_route_table" "my_route_table" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+    gateway_id = aws_internet_gateway.my_igw.id
   }
 }
 
 # Route Table Association
 resource "aws_route_table_association" "subnet_association" {
   subnet_id      = aws_subnet.main_subnet.id
-  route_table_id = aws_route_table.route_table.id
+  route_table_id = aws_route_table.my_route_table.id
 }
 
 # Security Group
@@ -71,14 +65,14 @@ resource "aws_security_group" "my_web_sg" {
   }
 }
 
-# EC2 Instance
+
 resource "aws_instance" "web" {
-  ami                         = data.aws_ami.ubuntu.id
+  ami                         = "ami-0c55b159cbfafe1f0" 
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.main_subnet.id
-  vpc_security_group_ids      = [aws_security_group.web_sg.id]
+  vpc_security_group_ids      = [aws_security_group.my_web_sg.id]
   associate_public_ip_address = true
-  key_name                    = var.key_name
+
 
   user_data = <<-EOF
               #!/bin/bash
