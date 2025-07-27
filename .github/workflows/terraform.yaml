@@ -53,6 +53,10 @@ jobs:
         working-directory: ./terraform
         run: terraform plan
 
+      - name: Terraform Plan
+        working-directory: ./terraform
+        run: terraform destroy 
+
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         working-directory: ./terraform
