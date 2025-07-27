@@ -17,11 +17,7 @@ variable "ami_id" {
   default       = "ami-020cba7c55df1f615" 
 }
 
-variable "key_path_name" {
-  description = "Name of the SSH key pair to use for the instance"
-  type        = string
-  default     = "/home/codespace/.ssh/my-key.pem"
-}
+
 
 variable "key_name" {
   description = "Name of the SSH key pair to use for the instance"

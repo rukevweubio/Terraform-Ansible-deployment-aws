@@ -15,12 +15,12 @@ resource "aws_subnet" "main_subnet" {
 
 # Internet Gateway
 resource "aws_internet_gateway" "my_igw" {
-  vpc_id = aws_vpc.main_vpc.id
+  vpc_id = data.aws_vpc.existing_vpc.id
 }
 
 # Route Table
 resource "aws_route_table" "my_route_table" {
-  vpc_id = aws_vpc.main_vpc.id
+  vpc_id = data.aws_vpc.existing_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -38,7 +38,7 @@ resource "aws_route_table_association" "subnet_association" {
 resource "aws_security_group" "my_web_sg" {
   name        = "web-sg"
   description = "Allow HTTP and SSH"
-  vpc_id      = aws_vpc.main_vpc.id
+  vpc_id      = data.aws_vpc.existing_vpc.id
 
   ingress {
     from_port   = 22
