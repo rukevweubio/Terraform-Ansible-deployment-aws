@@ -1,10 +1,8 @@
-name: Terraform Ansible Pipeline newpipeline
+name: Terraform Ansible Pipeline
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    branches: [main]
 
 env:
   AWS_REGION: us-east-1
@@ -12,7 +10,6 @@ env:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    environment: production
     outputs:
       public_ip: ${{ steps.tf_output.outputs.public_ip }}
 
@@ -25,9 +22,9 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Add SSH key (optional)
+      - name: Add SSH key for EC2
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
@@ -45,21 +42,12 @@ jobs:
       - name: Terraform Validate
         working-directory: ./terraform
         run: terraform validate
-      - name: schek teh diretory 
-        run: |
-             ls -la ./terraform
-              ls -la 
-      - name: Terraform Plan
-        working-directory: ./terraform
-        run: terraform plan
-
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
         working-directory: ./terraform
         run: terraform apply -auto-approve
 
-      - name: Get Terraform Output (EC2 IP)
+      - name: Get EC2 Public IP
         id: tf_output
         working-directory: ./terraform
         run: |
@@ -68,7 +56,6 @@ jobs:
   ansible:
     needs: terraform
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout code
@@ -79,23 +66,37 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install Ansible & Dependencies
+      - name: Install Ansible & sshpass
         run: |
           sudo apt-get update
           sudo apt-get install -y sshpass
           pip install ansible boto3
 
-      - name: Add SSH Private Key
+      - name: Add SSH Key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Run Ansible Playbook
+      - name: Wait for SSH to be Ready
+        run: sleep 30
+
+      - name: Create Inventory
         env:
           EC2_PUBLIC_IP: ${{ needs.terraform.outputs.public_ip }}
         run: |
           echo "[web]" > inventory
           echo "$EC2_PUBLIC_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory
-          ansible-playbook -i inventory ./ansible/deploy.yaml
-          ansible-playbook -i inventory ./ansible/ansibledeploy.yaml
+
+      - name: Create Ansible Config
+        run: |
+          echo "[defaults]" > ansible.cfg
+          echo "host_key_checking = False" >> ansible.cfg
+          echo "inventory = ./inventory" >> ansible.cfg
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook -i inventory ./ansible/deploy.yaml
+
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook -i inventory ./ansible/ansibledeploy.yaml

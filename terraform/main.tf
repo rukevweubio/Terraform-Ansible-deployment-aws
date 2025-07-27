@@ -64,12 +64,17 @@ resource "aws_security_group" "my_web_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
+resource "aws_key_pair" "deployer" {
+  key_name   = "deployer-key"
+  public_key = file("/home/codespace/.ssh/my-key.pem.pub")
+}
 
 resource "aws_instance" "web" {
   ami                         = var.ami_id 
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.main_subnet.id
+  key_name                   = aws_key_pair.deployer.key_name
+  availability_zone           = "us-east-1a"
   vpc_security_group_ids      = [aws_security_group.my_web_sg.id]
   associate_public_ip_address = true
 
