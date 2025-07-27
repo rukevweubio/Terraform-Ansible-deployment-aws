@@ -65,8 +65,8 @@ resource "aws_security_group" "my_web_sg" {
   }
 }
 resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
-  public_key = file("/home/codespace/.ssh/my-key.pem.pub")
+  key_name   = "my-key"
+  public_key = file("${path.module}/my-key.pub")
 }
 
 resource "aws_instance" "web" {
