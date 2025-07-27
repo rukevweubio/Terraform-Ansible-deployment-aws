@@ -1,0 +1,29 @@
+---
+- name: Deploy Application
+  hosts: all
+  become: true
+  tasks:
+    - name: update thecaches of the
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: copy teh index.html from the directory to the  nginx 
+      copy:
+        src: /ansible/index.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    
+    - name: ensure nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: debug the masseg of teh nginx
+      debug:
+        msg: "Nginx is running and serving the application"
+    

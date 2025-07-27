@@ -98,3 +98,4 @@ jobs:
           echo "[web]" > inventory
           echo "$EC2_PUBLIC_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory
           ansible-playbook -i inventory ./ansible/deploy.yaml
+          ansible-playbook -i inventory ./ansible/ansibledeploy.yaml
