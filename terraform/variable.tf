@@ -7,10 +7,6 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "key_name" {
-  description = "Name of the EC2 Key Pair to allow SSH access"
-  type        = string
-}
 variable "instance_type" {
   description = "Type of EC2 instance to launch"
   type        = string
