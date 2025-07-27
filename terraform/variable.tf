@@ -1,9 +1,6 @@
-# Provider block
-provider "aws" {
-  region = var.aws_region
-}
 
-# Variables block
+
+
 variable "aws_region" {
   description = "AWS region to deploy resources"
   type        = string
