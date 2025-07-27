@@ -67,8 +67,8 @@ resource "aws_security_group" "my_web_sg" {
 
 
 resource "aws_instance" "web" {
-  ami                         = "ami-020cba7c55df1f6150" 
-  instance_type               = "t2.micro"
+  ami                         = var.ami_id 
+  instance_type               = var.instance_type
   subnet_id                   = aws_subnet.main_subnet.id
   vpc_security_group_ids      = [aws_security_group.my_web_sg.id]
   associate_public_ip_address = true
