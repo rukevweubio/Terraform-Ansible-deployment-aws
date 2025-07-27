@@ -45,7 +45,10 @@ jobs:
       - name: Terraform Validate
         working-directory: ./terraform
         run: terraform validate
-
+      - name: schek teh diretory 
+        run: |
+             ls -la ./terraform
+              ls -la 
       - name: Terraform Plan
         working-directory: ./terraform
         run: terraform plan
