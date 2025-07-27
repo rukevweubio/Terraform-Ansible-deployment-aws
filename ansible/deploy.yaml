@@ -1,0 +1,51 @@
+---
+- name: Deploy Application
+  hosts: all
+  become: true
+  tasks:
+    - name: update thecaches of the
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+    - name: Install required packages
+      apt:
+        name:
+          - python3-pip 
+        state: present
+
+    - name: Install pip packages
+      pip:
+        name:
+          - ansible
+          - ansible-lint
+        state: present
+
+    - name: install nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Start and enable nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: copy the index.html file
+      copy:
+        src: /ansible/index.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Ensure the web server is running
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: debug the ansible 
+      debug:
+        msg: "Nginx is installed and running, and the index.html file has been copied successfully."
+        
