@@ -1,14 +1,11 @@
 
-# VPC
-resource "aws_vpc" "main_vpc" {
-  cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "main-vpc"
-  }
+
+data "aws_vpc" "existing_vpc" {
+  default = true  
 }
 
 resource "aws_subnet" "main_subnet" {
-  vpc_id            = aws_vpc.main_vpc.id
+  vpc_id            = data.aws_vpc.existing_vpc.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1a"
   tags = {
@@ -64,16 +61,13 @@ resource "aws_security_group" "my_web_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-resource "aws_key_pair" "deployer" {
-  key_name   = "my-key"
-  public_key = file("${path.module}/my-key.pub")
-}
+
 
 resource "aws_instance" "web" {
   ami                         = var.ami_id 
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.main_subnet.id
-  key_name                   = aws_key_pair.deployer.key_name
+  key_name                   = "my-key"
   availability_zone           = "us-east-1a"
   vpc_security_group_ids      = [aws_security_group.my_web_sg.id]
   associate_public_ip_address = true
